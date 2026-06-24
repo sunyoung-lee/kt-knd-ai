@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>면접 준비 연습</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --primary: #4f6ef7;
+    --primary-dark: #3b55d9;
+    --text: #1f2433;
+    --muted: #717892;
+    --border: #e4e8f2;
+    --tag-job: #2f80ed;
+    --tag-person: #27ae60;
+    --tag-exp: #eb5757;
+    --saved: #27ae60;
+    --shadow: 0 4px 16px rgba(33, 43, 84, 0.08);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Apple SD Gothic Neo",
+      "Noto Sans KR", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    background: linear-gradient(135deg, var(--primary), #7a8cff);
+    color: #fff;
+    padding: 28px 18px 22px;
+    text-align: center;
+  }
+  header h1 { margin: 0 0 6px; font-size: 1.5rem; }
+  header p { margin: 0; opacity: 0.92; font-size: 0.9rem; }
+
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 16px 14px 48px;
+  }
+
+  .progress {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 0.88rem;
+    color: var(--muted);
+    box-shadow: var(--shadow);
+  }
+  .progress strong { color: var(--primary); }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .filter-btn {
+    flex: 1 1 auto;
+    min-width: 72px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .filter-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+
+  .q-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .q-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .q-head:active { background: #fafbff; }
+
+  .tag {
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-top: 2px;
+  }
+  .tag.job { background: var(--tag-job); }
+  .tag.person { background: var(--tag-person); }
+  .tag.exp { background: var(--tag-exp); }
+
+  .q-text { flex: 1; font-size: 0.98rem; font-weight: 500; }
+
+  .q-meta {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 1px;
+  }
+  .saved-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--saved);
+    display: none;
+  }
+  .saved-dot.show { display: block; }
+  .chevron {
+    color: var(--muted);
+    transition: transform 0.2s ease;
+    font-size: 0.8rem;
+  }
+  .q-card.open .chevron { transform: rotate(180deg); }
+
+  .q-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .q-card.open .q-body { display: block; }
+
+  textarea {
+    width: 100%;
+    min-height: 120px;
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    resize: vertical;
+    background: #fbfcff;
+    color: var(--text);
+  }
+  textarea:focus { outline: none; border-color: var(--primary); background: #fff; }
+
+  .q-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .btn {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 9px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-save { background: var(--primary); color: #fff; }
+  .btn-save:active { background: var(--primary-dark); }
+  .btn-clear { background: #eef0f6; color: var(--muted); }
+  .save-status {
+    font-size: 0.82rem;
+    color: var(--saved);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .save-status.show { opacity: 1; }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    padding: 40px 16px;
+    font-size: 0.92rem;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 0 16px 28px;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>🎤 면접 준비 연습</h1>
+    <p>질문을 골라 답변을 작성하고 저장하세요</p>
+  </header>
+
+  <div class="wrap">
+    <div class="progress" id="progress"></div>
+
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-cat="all">전체</button>
+      <button class="filter-btn" data-cat="job">직무</button>
+      <button class="filter-btn" data-cat="person">인성</button>
+      <button class="filter-btn" data-cat="exp">경험</button>
+    </div>
+
+    <div id="list"></div>
+
+    <footer>답변은 이 브라우저에만 저장됩니다 (localStorage)</footer>
+  </div>
+
+<script>
+  const QUESTIONS = [
+    { id: 1, cat: "job", q: "지원하신 직무에 대해 본인이 가진 강점은 무엇인가요?" },
+    { id: 2, cat: "job", q: "이 직무를 수행하는 데 가장 중요한 역량은 무엇이라고 생각하나요?" },
+    { id: 3, cat: "job", q: "우리 회사/팀에 지원한 이유가 무엇인가요?" },
+    { id: 4, cat: "person", q: "본인의 성격에서 가장 큰 장점과 단점은 무엇인가요?" },
+    { id: 5, cat: "person", q: "스트레스를 받는 상황에서 어떻게 대처하나요?" },
+    { id: 6, cat: "person", q: "동료와 갈등이 생겼을 때 어떻게 해결하나요?" },
+    { id: 7, cat: "person", q: "5년 후 본인의 모습을 어떻게 그리고 있나요?" },
+    { id: 8, cat: "exp", q: "지금까지 가장 큰 성취를 이룬 경험을 말씀해 주세요." },
+    { id: 9, cat: "exp", q: "실패했던 경험과 그로부터 배운 점은 무엇인가요?" },
+    { id: 10, cat: "exp", q: "팀으로 협업하여 문제를 해결한 경험을 들려주세요." }
+  ];
+
+  const CAT_LABEL = { job: "직무", person: "인성", exp: "경험" };
+  const STORAGE_KEY = "interview_answers_v1";
+
+  function loadAnswers() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+  function saveAnswer(id, text) {
+    const data = loadAnswers();
+    if (text.trim()) data[id] = text;
+    else delete data[id];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  let currentFilter = "all";
+  const listEl = document.getElementById("list");
+  const progressEl = document.getElementById("progress");
+
+  function updateProgress() {
+    const data = loadAnswers();
+    const done = QUESTIONS.filter(q => data[q.id] && data[q.id].trim()).length;
+    progressEl.innerHTML = `작성 완료 <strong>${done}</strong> / ${QUESTIONS.length} 문항`;
+  }
+
+  function render() {
+    const data = loadAnswers();
+    const items = QUESTIONS.filter(q => currentFilter === "all" || q.cat === currentFilter);
+    listEl.innerHTML = "";
+
+    if (items.length === 0) {
+      listEl.innerHTML = '<div class="empty">해당 카테고리의 질문이 없습니다.</div>';
+      return;
+    }
+
+    items.forEach(q => {
+      const hasAnswer = data[q.id] && data[q.id].trim();
+      const card = document.createElement("div");
+      card.className = "q-card";
+      card.innerHTML = `
+        <div class="q-head">
+          <span class="tag ${q.cat}">${CAT_LABEL[q.cat]}</span>
+          <span class="q-text">${q.q}</span>
+          <span class="q-meta">
+            <span class="saved-dot ${hasAnswer ? "show" : ""}" title="답변 저장됨"></span>
+            <span class="chevron">▼</span>
+          </span>
+        </div>
+        <div class="q-body">
+          <textarea placeholder="여기에 답변을 작성하세요...">${data[q.id] ? escapeHtml(data[q.id]) : ""}</textarea>
+          <div class="q-actions">
+            <button class="btn btn-save">저장</button>
+            <button class="btn btn-clear">지우기</button>
+            <span class="save-status">✓ 저장되었습니다</span>
+          </div>
+        </div>
+      `;
+
+      const head = card.querySelector(".q-head");
+      const textarea = card.querySelector("textarea");
+      const dot = card.querySelector(".saved-dot");
+      const status = card.querySelector(".save-status");
+
+      head.addEventListener("click", () => card.classList.toggle("open"));
+
+      card.querySelector(".btn-save").addEventListener("click", () => {
+        saveAnswer(q.id, textarea.value);
+        dot.classList.toggle("show", !!textarea.value.trim());
+        status.classList.add("show");
+        setTimeout(() => status.classList.remove("show"), 1500);
+        updateProgress();
+      });
+
+      card.querySelector(".btn-clear").addEventListener("click", () => {
+        textarea.value = "";
+        saveAnswer(q.id, "");
+        dot.classList.remove("show");
+        updateProgress();
+      });
+
+      listEl.appendChild(card);
+    });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  document.getElementById("filters").addEventListener("click", e => {
+    const btn = e.target.closest(".filter-btn");
+    if (!btn) return;
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentFilter = btn.dataset.cat;
+    render();
+  });
+
+  updateProgress();
+  render();
+</script>
+</body>
+</html>
