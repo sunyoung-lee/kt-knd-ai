@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!--
+  Day 1 강사 데모 — 비교 화면
+  데모 1(막연한 프롬프트) vs 데모 2(기획/PRD 기반)를 나란히 띄워 대비시킵니다.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Day 1 데모 비교 — 막연한 프롬프트 vs 기획 기반</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Noto Sans KR","Malgun Gothic",sans-serif; background:#f4f6fb; color:#1f2433; }
+  header { background:linear-gradient(135deg,#4f6ef7,#7a8cff); color:#fff; padding:24px 18px; text-align:center; }
+  header h1 { margin:0 0 6px; font-size:1.35rem; }
+  header p { margin:0; font-size:0.86rem; opacity:0.92; }
+
+  .wrap { max-width:980px; margin:0 auto; padding:20px 16px 48px; }
+
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:760px){ .grid { grid-template-columns:1fr; } }
+
+  .col { background:#fff; border:1px solid #e4e8f2; border-radius:16px; overflow:hidden; box-shadow:0 4px 16px rgba(33,43,84,0.08); }
+  .col-head { padding:14px 16px; color:#fff; }
+  .col.vague .col-head { background:#5b6b8c; }
+  .col.prd .col-head { background:#27ae60; }
+  .col-head .tag { font-size:0.72rem; font-weight:700; opacity:0.9; }
+  .col-head .ttl { font-size:1.05rem; font-weight:800; margin-top:2px; }
+  .col-head .prompt { margin-top:8px; font-size:0.78rem; background:rgba(255,255,255,0.18); border-radius:8px; padding:7px 10px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+
+  .frame { position:relative; height:600px; background:#eceff4; }
+  .frame iframe { width:100%; height:100%; border:0; display:block; }
+  .open { display:block; text-align:center; padding:10px; font-size:0.8rem; color:#4f6ef7; text-decoration:none; border-top:1px solid #e4e8f2; }
+
+  /* 차이 요약 표 */
+  .diff { margin-top:24px; background:#fff; border:1px solid #e4e8f2; border-radius:16px; padding:18px; box-shadow:0 4px 16px rgba(33,43,84,0.08); }
+  .diff h2 { margin:0 0 12px; font-size:1.05rem; }
+  table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+  th, td { text-align:left; padding:9px 8px; border-bottom:1px solid #eef0f6; vertical-align:top; }
+  th { color:#717892; font-size:0.74rem; }
+  td.v { color:#5b6b8c; }
+  td.p { color:#1e9b52; font-weight:600; }
+  .punch { margin-top:16px; text-align:center; font-size:0.92rem; color:#1f2433; line-height:1.6; }
+  .punch b { color:#27ae60; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>같은 앱, 다른 시작점</h1>
+    <p>막연한 프롬프트 vs 기획(PRD)을 거친 결과 — 무엇이 달라지나?</p>
+  </header>
+
+  <div class="wrap">
+    <div class="grid">
+      <!-- 데모 1 -->
+      <div class="col vague">
+        <div class="col-head">
+          <div class="tag">데모 1 · 기획 없이</div>
+          <div class="ttl">막연한 프롬프트 결과</div>
+          <div class="prompt">“습관 트래커 앱 만들어줘”</div>
+        </div>
+        <div class="frame"><iframe src="oneuldo-vague.html" title="데모 1"></iframe></div>
+        <a class="open" href="oneuldo-vague.html" target="_blank">전체 화면으로 열기 ↗</a>
+      </div>
+
+      <!-- 데모 2 -->
+      <div class="col prd">
+        <div class="col-head">
+          <div class="tag">데모 2 · 기획(PRD) 기반</div>
+          <div class="ttl">“오늘도”</div>
+          <div class="prompt">문제정의 → MoSCoW → PRD → 구현</div>
+        </div>
+        <div class="frame"><iframe src="oneuldo.html" title="데모 2"></iframe></div>
+        <a class="open" href="oneuldo.html" target="_blank">전체 화면으로 열기 ↗</a>
+      </div>
+    </div>
+
+    <div class="diff">
+      <h2>무엇이 달라졌나</h2>
+      <table>
+        <tr><th style="width:24%">관점</th><th style="width:38%">데모 1 (막연)</th><th style="width:38%">데모 2 (기획 기반)</th></tr>
+        <tr><td>대상 사용자</td><td class="v">불명확 — "모두"</td><td class="p">며칠 빠지면 포기하는 취준생</td></tr>
+        <tr><td>해결할 문제</td><td class="v">없음 (기능 나열)</td><td class="p">"진척이 안 보여 포기"를 해결</td></tr>
+        <tr><td>기능 수</td><td class="v">7습관·알림·통계·캘린더·설정 다수</td><td class="p">단 3개 (체크·streak·주간율)</td></tr>
+        <tr><td>첫 화면</td><td class="v">탭 4개, 무엇부터 할지 모름</td><td class="p">큰 버튼 하나 — "오늘 했어요?"</td></tr>
+        <tr><td>"하루 빠짐"</td><td class="v">대응 없음</td><td class="p">"이번 주로 보면 성공 중" 메시지</td></tr>
+        <tr><td>판단 기준</td><td class="v">그럴듯함</td><td class="p">PRD·KPI로 검증 가능</td></tr>
+      </table>
+      <div class="punch">
+        같은 도구, 같은 AI라도 — <br>
+        <b>기획(무엇을·누구를·왜)을 먼저 정하면 결과물이 달라집니다.</b><br>
+        이게 "AI 활용 PM"의 핵심이에요.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
