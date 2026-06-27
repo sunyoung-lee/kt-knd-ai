@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>주최자 관리 | AI PM 실습 워크숍</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-sub: #6b7280;
+      --accent: #2563eb;
+    }
+    html[data-theme="dark"] {
+      --bg: #111827;
+      --surface: #1f2937;
+      --border: #374151;
+      --text: #f9fafb;
+      --text-sub: #9ca3af;
+      --accent: #3b82f6;
+    }
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme="light"]) {
+        --bg: #111827; --surface: #1f2937; --border: #374151;
+        --text: #f9fafb; --text-sub: #9ca3af; --accent: #3b82f6;
+      }
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.5rem 1rem 4rem;
+      transition: background .2s, color .2s;
+    }
+
+    .wrap { max-width: 900px; margin: 0 auto; }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .header-left h1 { font-size: 1.2rem; font-weight: 700; }
+    .header-left p { font-size: .82rem; color: var(--text-sub); margin-top: .2rem; }
+    .back-link { font-size: .82rem; color: var(--text-sub); text-decoration: none; }
+    .back-link:hover { color: var(--accent); }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .75rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      text-align: center;
+    }
+    .stat-num { font-size: 1.75rem; font-weight: 700; line-height: 1; }
+    .stat-label { font-size: .78rem; color: var(--text-sub); margin-top: .35rem; }
+    .stat-card.total .stat-num { color: var(--accent); }
+    .stat-card.pending .stat-num { color: #d97706; }
+    .stat-card.approved .stat-num { color: #16a34a; }
+    .stat-card.rejected .stat-num { color: #dc2626; }
+
+    /* Filter tabs */
+    .tabs {
+      display: flex;
+      gap: .5rem;
+      margin-bottom: 1rem;
+    }
+    .tab {
+      padding: .4rem .9rem;
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-sub);
+      transition: all .15s;
+    }
+    .tab.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Table card */
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .table-card table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .875rem;
+    }
+    .table-card th {
+      background: var(--bg);
+      padding: .65rem 1rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: .8rem;
+      color: var(--text-sub);
+      border-bottom: 1px solid var(--border);
+    }
+    .table-card td {
+      padding: .85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .table-card tr:last-child td { border-bottom: none; }
+    .table-card tr:hover td { background: var(--bg); }
+
+    /* Reason expand */
+    .reason-cell {
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: pointer;
+      color: var(--text-sub);
+      font-size: .82rem;
+    }
+    .reason-cell:hover { color: var(--text); }
+
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      padding: .25rem .65rem;
+      border-radius: 20px;
+      font-size: .78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge.pending { background: #fef3c7; color: #92400e; }
+    .badge.approved { background: #dcfce7; color: #166534; }
+    .badge.rejected { background: #fee2e2; color: #991b1b; }
+    html[data-theme="dark"] .badge.pending { background: #1c1006; color: #fde68a; }
+    html[data-theme="dark"] .badge.approved { background: #052e16; color: #86efac; }
+    html[data-theme="dark"] .badge.rejected { background: #1c0606; color: #fca5a5; }
+
+    /* Action buttons */
+    .actions { display: flex; gap: .4rem; }
+    .btn-approve, .btn-reject, .btn-undo {
+      padding: .3rem .65rem;
+      border-radius: 6px;
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid;
+      font-family: inherit;
+      transition: opacity .15s;
+    }
+    .btn-approve { background: #dcfce7; color: #166534; border-color: #86efac; }
+    .btn-approve:hover { opacity: .8; }
+    .btn-reject { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+    .btn-reject:hover { opacity: .8; }
+    .btn-undo { background: var(--bg); color: var(--text-sub); border-color: var(--border); }
+    .btn-undo:hover { opacity: .8; }
+    html[data-theme="dark"] .btn-approve { background: #052e16; color: #86efac; border-color: #166534; }
+    html[data-theme="dark"] .btn-reject { background: #1c0606; color: #fca5a5; border-color: #991b1b; }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-sub);
+    }
+    .empty-icon { font-size: 2rem; margin-bottom: .75rem; }
+
+    /* Theme toggle */
+    .toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .45rem .7rem;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--text);
+      z-index: 100;
+    }
+
+    /* HITL banner */
+    .hitl-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: .7rem 1rem;
+      font-size: .82rem;
+      color: #1d4ed8;
+      margin-bottom: 1rem;
+      display: flex;
+      gap: .5rem;
+    }
+    html[data-theme="dark"] .hitl-banner { background: #0c1a3d; border-color: #1e40af; color: #93c5fd; }
+
+    /* Clear button */
+    .danger-zone { margin-top: 1.5rem; text-align: right; }
+    .btn-clear {
+      background: none;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      border-radius: 6px;
+      padding: .4rem .9rem;
+      font-size: .78rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-clear:hover { background: #fee2e2; }
+
+    @media (max-width: 640px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .table-card { overflow-x: auto; }
+      .table-card table { min-width: 600px; }
+    }
+  </style>
+</head>
+<body>
+
+<button class="toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-left">
+      <h1>🔧 주최자 관리 화면</h1>
+      <p>AI PM 실습 워크숍 · 신청자 목록 및 승인 관리</p>
+    </div>
+    <a href="index.html" class="back-link">← 신청 화면으로</a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats" id="statsRow"></div>
+
+  <!-- HITL notice -->
+  <div class="hitl-banner">
+    🔵 <span><strong>[HITL 포인트]</strong> 승인·거절은 자동화하지 않습니다. 각 신청서를 읽고 주최자가 직접 결정합니다.</span>
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="setFilter('all', this)">전체</button>
+    <button class="tab" onclick="setFilter('pending', this)">검토 중</button>
+    <button class="tab" onclick="setFilter('approved', this)">승인됨</button>
+    <button class="tab" onclick="setFilter('rejected', this)">거절됨</button>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>이름</th>
+          <th>이메일</th>
+          <th>소속</th>
+          <th>신청 이유</th>
+          <th>신청 시각</th>
+          <th>상태</th>
+          <th>처리</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <div class="danger-zone">
+    <button class="btn-clear" onclick="clearAll()">🗑 전체 데이터 초기화 (테스트용)</button>
+  </div>
+
+</div>
+
+<script>
+  const KEY = 'event_applications';
+  const THEME_KEY = 'kairos-audit-theme';
+  let currentFilter = 'all';
+
+  /* ── Theme ── */
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem(THEME_KEY, t);
+  }
+  function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    const s = localStorage.getItem(THEME_KEY);
+    if (s) { applyTheme(s); return; }
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) applyTheme('dark');
+  })();
+
+  /* ── Data ── */
+  function getApps() { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+  function saveApps(apps) { localStorage.setItem(KEY, JSON.stringify(apps)); }
+
+  function updateStatus(id, status) {
+    const apps = getApps();
+    const i = apps.findIndex(a => a.id === id);
+    if (i >= 0) apps[i].status = status;
+    saveApps(apps);
+    render();
+  }
+
+  /* ── Stats ── */
+  function renderStats(apps) {
+    const total = apps.length;
+    const pending = apps.filter(a => a.status === 'pending').length;
+    const approved = apps.filter(a => a.status === 'approved').length;
+    const rejected = apps.filter(a => a.status === 'rejected').length;
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card total"><div class="stat-num">${total}</div><div class="stat-label">전체 신청</div></div>
+      <div class="stat-card pending"><div class="stat-num">${pending}</div><div class="stat-label">검토 중</div></div>
+      <div class="stat-card approved"><div class="stat-num">${approved}</div><div class="stat-label">승인됨</div></div>
+      <div class="stat-card rejected"><div class="stat-num">${rejected}</div><div class="stat-label">거절됨</div></div>
+    `;
+  }
+
+  /* ── Table ── */
+  const BADGE = {
+    pending: '<span class="badge pending">⏳ 검토 중</span>',
+    approved: '<span class="badge approved">✅ 승인됨</span>',
+    rejected: '<span class="badge rejected">❌ 거절됨</span>',
+  };
+
+  function actionBtns(app) {
+    if (app.status === 'pending') {
+      return `<div class="actions">
+        <button class="btn-approve" onclick="updateStatus(${app.id},'approved')">✅ 승인</button>
+        <button class="btn-reject" onclick="updateStatus(${app.id},'rejected')">❌ 거절</button>
+      </div>`;
+    }
+    return `<button class="btn-undo" onclick="updateStatus(${app.id},'pending')">↩ 되돌리기</button>`;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function fmt(iso) {
+    const d = new Date(iso);
+    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+
+  function render() {
+    const all = getApps();
+    renderStats(all);
+
+    const list = currentFilter === 'all' ? all : all.filter(a => a.status === currentFilter);
+    const tbody = document.getElementById('tbody');
+
+    if (list.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-icon">📭</div>신청자가 없습니다.</div></td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = list.map((app, i) => `
+      <tr>
+        <td style="color:var(--text-sub);font-size:.8rem">${i + 1}</td>
+        <td><strong>${esc(app.name)}</strong></td>
+        <td style="font-size:.82rem;color:var(--text-sub)">${esc(app.email)}</td>
+        <td style="font-size:.82rem">${esc(app.org)}</td>
+        <td><div class="reason-cell" title="${esc(app.reason)}">${esc(app.reason)}</div></td>
+        <td style="font-size:.8rem;color:var(--text-sub);white-space:nowrap">${fmt(app.appliedAt)}</td>
+        <td>${BADGE[app.status] || ''}</td>
+        <td>${actionBtns(app)}</td>
+      </tr>
+    `).join('');
+  }
+
+  /* ── Filter ── */
+  function setFilter(f, el) {
+    currentFilter = f;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    render();
+  }
+
+  /* ── Clear ── */
+  function clearAll() {
+    if (!confirm('모든 신청 데이터를 삭제할까요? (테스트 초기화용)')) return;
+    localStorage.removeItem(KEY);
+    render();
+  }
+
+  /* ── Init ── */
+  render();
+
+  /* ── Auto refresh (same tab) ── */
+  window.addEventListener('storage', () => render());
+</script>
+</body>
+</html>

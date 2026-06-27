@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>행사 신청 | AI PM 실습 워크숍</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f3f4f6;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-sub: #6b7280;
+      --accent: #2563eb;
+      --accent-h: #1d4ed8;
+    }
+    html[data-theme="dark"] {
+      --bg: #111827;
+      --surface: #1f2937;
+      --border: #374151;
+      --text: #f9fafb;
+      --text-sub: #9ca3af;
+      --accent: #3b82f6;
+      --accent-h: #60a5fa;
+    }
+    @media (prefers-color-scheme: dark) {
+      html:not([data-theme="light"]) {
+        --bg: #111827; --surface: #1f2937; --border: #374151;
+        --text: #f9fafb; --text-sub: #9ca3af;
+        --accent: #3b82f6; --accent-h: #60a5fa;
+      }
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+      transition: background .2s, color .2s;
+    }
+
+    .wrap { max-width: 600px; margin: 0 auto; }
+
+    /* Event hero */
+    .hero {
+      background: linear-gradient(135deg, #1e40af, #2563eb);
+      color: #fff;
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 1rem; line-height: 1.4; }
+    .meta { display: flex; flex-direction: column; gap: .5rem; font-size: .875rem; opacity: .92; }
+    .meta-row { display: flex; align-items: center; gap: .5rem; }
+    .cap-badge {
+      display: inline-block;
+      background: rgba(255,255,255,.18);
+      border-radius: 20px;
+      padding: .25rem .85rem;
+      font-size: .8rem;
+      margin-top: .85rem;
+    }
+
+    /* Form card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.75rem;
+    }
+    .card-title { font-size: 1rem; font-weight: 600; margin-bottom: 1.25rem; }
+
+    .fg { margin-bottom: 1.1rem; }
+    label { display: block; font-size: .85rem; font-weight: 500; margin-bottom: .35rem; }
+    .req { color: #ef4444; margin-left: 2px; }
+    input, textarea {
+      width: 100%;
+      padding: .6rem .8rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color .15s;
+    }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 90px; }
+    .hint { font-size: .78rem; color: var(--text-sub); margin-top: .3rem; }
+
+    .btn {
+      width: 100%;
+      padding: .75rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .15s;
+      margin-top: .25rem;
+    }
+    .btn:hover { background: var(--accent-h); }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+
+    /* Success */
+    .success {
+      background: var(--surface);
+      border: 1px solid #bbf7d0;
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      display: none;
+    }
+    .success.show { display: block; }
+    .success-icon { font-size: 2.5rem; margin-bottom: .75rem; }
+    .success h2 { font-size: 1.15rem; color: #166534; margin-bottom: .4rem; }
+    html[data-theme="dark"] .success h2 { color: #86efac; }
+    .success p { font-size: .875rem; color: var(--text-sub); }
+    .success-detail {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1.25rem;
+      text-align: left;
+    }
+    .sdr {
+      display: flex;
+      justify-content: space-between;
+      font-size: .875rem;
+      padding: .35rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .sdr:last-child { border-bottom: none; }
+    .sdr-label { color: var(--text-sub); }
+    .sdr-val { font-weight: 600; }
+
+    /* Theme toggle */
+    .toggle {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .45rem .7rem;
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--text);
+      z-index: 100;
+    }
+    .toggle:hover { border-color: var(--accent); }
+
+    /* Admin link */
+    .admin-link { text-align: center; margin-top: 1.25rem; font-size: .8rem; color: var(--text-sub); }
+    .admin-link a { color: var(--text-sub); }
+
+    /* HITL notice */
+    .hitl-notice {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 8px;
+      padding: .75rem 1rem;
+      font-size: .82rem;
+      color: #92400e;
+      margin-bottom: 1.1rem;
+      display: flex;
+      gap: .5rem;
+      align-items: flex-start;
+    }
+    html[data-theme="dark"] .hitl-notice {
+      background: #1c1006;
+      border-color: #713f12;
+      color: #fde68a;
+    }
+  </style>
+</head>
+<body>
+
+<button class="toggle" onclick="toggleTheme()" title="테마 변경" id="themeBtn">🌙</button>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>🎯 AI 프로덕트 매니징 실습 행사<br><span style="font-weight:400;font-size:1rem;opacity:.85">신청 등록 · 2026년 8월</span></h1>
+    <div class="meta">
+      <div class="meta-row">📅 2026년 8월 20일 (목) 10:00 – 18:30</div>
+      <div class="meta-row">📍 온라인 (Zoom 링크는 승인 후 이메일 발송)</div>
+      <div class="meta-row">🏢 주최: KAIROS AI Studio</div>
+    </div>
+    <div class="cap-badge" id="capBadge">⚡ 남은 자리: 확인 중…</div>
+  </div>
+
+  <!-- Form -->
+  <div class="card" id="formCard">
+    <div class="card-title">참가 신청서</div>
+
+    <div class="hitl-notice">
+      ⚠️ <span>신청서 제출 후 주최자 검토를 거쳐 <strong>개별 승인</strong>됩니다. 자동 승인이 아닙니다.</span>
+    </div>
+
+    <form id="applyForm">
+      <div class="fg">
+        <label>이름 <span class="req">*</span></label>
+        <input type="text" id="name" placeholder="홍길동" required>
+      </div>
+      <div class="fg">
+        <label>이메일 <span class="req">*</span></label>
+        <input type="email" id="email" placeholder="you@example.com" required>
+        <div class="hint">승인 여부를 이 이메일로 안내해 드립니다.</div>
+      </div>
+      <div class="fg">
+        <label>연락처 <span class="req">*</span></label>
+        <input type="tel" id="phone" placeholder="010-0000-0000" required>
+      </div>
+      <div class="fg">
+        <label>소속</label>
+        <input type="text" id="org" placeholder="회사명 또는 학교명 (선택)">
+      </div>
+      <div class="fg">
+        <label>참가 신청 이유 <span class="req">*</span></label>
+        <textarea id="reason" placeholder="이 행사에 참가하고 싶은 이유를 자유롭게 작성해 주세요. (50자 이상)" required minlength="50"></textarea>
+        <div class="hint" id="reasonCount">0 / 50자 이상</div>
+      </div>
+      <button type="submit" class="btn" id="submitBtn">신청하기</button>
+    </form>
+  </div>
+
+  <!-- Success -->
+  <div class="success" id="successCard">
+    <div class="success-icon">✅</div>
+    <h2>신청 완료!</h2>
+    <p>주최자 검토 후 이메일로 승인 여부를 안내드립니다.<br>보통 1–2 영업일이 소요됩니다.</p>
+    <div class="success-detail" id="successDetail"></div>
+  </div>
+
+  <div class="admin-link"><a href="admin.html">주최자 관리 화면 →</a></div>
+
+</div>
+
+<script>
+  const KEY = 'event_applications';
+  const THEME_KEY = 'kairos-audit-theme';
+  const CAPACITY = 30;
+
+  /* ── Theme ── */
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem(THEME_KEY, t);
+  }
+  function toggleTheme() {
+    applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  }
+  (function () {
+    const s = localStorage.getItem(THEME_KEY);
+    if (s) { applyTheme(s); return; }
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) applyTheme('dark');
+  })();
+
+  /* ── Data ── */
+  function getApps() { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+
+  /* ── Capacity badge ── */
+  function updateCap() {
+    const approved = getApps().filter(a => a.status === 'approved').length;
+    const left = CAPACITY - approved;
+    const el = document.getElementById('capBadge');
+    el.textContent = left <= 0 ? '❌ 정원 마감 (30/30)' : `⚡ 남은 자리: ${left}명 / ${CAPACITY}명`;
+  }
+  updateCap();
+
+  /* ── Reason char count ── */
+  document.getElementById('reason').addEventListener('input', function () {
+    const len = this.value.length;
+    const hint = document.getElementById('reasonCount');
+    hint.textContent = len >= 50 ? `✅ ${len}자` : `${len} / 50자 이상`;
+    hint.style.color = len >= 50 ? '#16a34a' : '';
+  });
+
+  /* ── Submit ── */
+  document.getElementById('applyForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '제출 중…';
+
+    const app = {
+      id: Date.now(),
+      name: document.getElementById('name').value.trim(),
+      email: document.getElementById('email').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      org: document.getElementById('org').value.trim() || '미기재',
+      reason: document.getElementById('reason').value.trim(),
+      appliedAt: new Date().toISOString(),
+      status: 'pending'
+    };
+
+    const apps = getApps();
+    apps.push(app);
+    localStorage.setItem(KEY, JSON.stringify(apps));
+
+    setTimeout(() => {
+      document.getElementById('formCard').style.display = 'none';
+      const sc = document.getElementById('successCard');
+      sc.classList.add('show');
+      document.getElementById('successDetail').innerHTML = `
+        <div class="sdr"><span class="sdr-label">이름</span><span class="sdr-val">${app.name}</span></div>
+        <div class="sdr"><span class="sdr-label">이메일</span><span class="sdr-val">${app.email}</span></div>
+        <div class="sdr"><span class="sdr-label">신청 시각</span><span class="sdr-val">${new Date(app.appliedAt).toLocaleString('ko-KR')}</span></div>
+        <div class="sdr"><span class="sdr-label">처리 상태</span><span class="sdr-val">⏳ 주최자 검토 중</span></div>
+      `;
+    }, 350);
+  });
+</script>
+</body>
+</html>
